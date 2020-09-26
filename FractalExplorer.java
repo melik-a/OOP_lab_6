@@ -210,10 +210,12 @@ public class FractalExplorer {
                     RGBcolors[x] = Color.HSBtoRGB(hue, 1f, 1f);
                 }
                 //this.display.drawPixel(x, y, color);
+                
             }
-            rowsRemaining--;
-            if(rowsRemaining == 0)
-                enableUI(true);
+        
+            
+            
+        
             return null;
         }
 
@@ -226,7 +228,11 @@ public class FractalExplorer {
                 display.drawPixel(xStr, yCompStr, RGBcolors[xStr]);
             }
             display.repaint(0,0,yCompStr,screenSize,1);
-            //display.repaint();
+            
+            rowsRemaining--;
+            if(rowsRemaining == 0){
+                enableUI(true);
+            }
             super.done();
         }
     }
