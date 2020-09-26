@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -23,6 +24,8 @@ public class FractalExplorer {
     
     private ArrayList<FractalGenerator> fracGen;
     private Double complRange;
+
+    private int rowsRemaining;
    
     private JFrame window;
     private JButton resetButton;
@@ -81,24 +84,14 @@ public class FractalExplorer {
     }
 
     public void drawFractal(){
+        //display.clearImage();
+        enableUI(false);
+        rowsRemaining = screenSize;
         for(int x = 0; x < this.screenSize; x++)
-            for(int y = 0; y < this.screenSize; y++)
-            {
-                double xCoord = FractalGenerator.getCoord (this.complRange.x, this.complRange.x + this.complRange.width,
-                                                            this.display.getWidth(), x);
-                double yCoord = FractalGenerator.getCoord (this.complRange.y, this.complRange.y + this.complRange.height,
-                                                            this.display.getHeight(), y);
-                int selectedFrac = combo.getSelectedIndex();
-
-                int numOfIterations = this.fracGen.get(selectedFrac).numIterations(xCoord, yCoord);
-                int color = Color.HSBtoRGB(0, 0, 0);
-                if (numOfIterations != -1)
-                {
-                    float hue = 0.7f + (float) numOfIterations / 200f;
-                    color = Color.HSBtoRGB(hue, 1f, 1f);
-                }
-                this.display.drawPixel(x, y, color);
-            }
+        {
+            FractalWorker worker = new FractalWorker(x);
+            worker.execute();
+        }
     }
 
     private class resetButtonListener implements ActionListener{
@@ -143,6 +136,9 @@ public class FractalExplorer {
         @Override
         public void mouseClicked(MouseEvent e) {
             // TODO Auto-generated method stub
+            if(rowsRemaining != 0)
+                return;
+
             double xCoord = FractalGenerator.getCoord (complRange.x, complRange.x + complRange.width,
                                                         display.getWidth(), e.getX());
             double yCoord = FractalGenerator.getCoord (complRange.y, complRange.y + complRange.height,
@@ -186,6 +182,61 @@ public class FractalExplorer {
         }
     }
 
+    private class FractalWorker extends SwingWorker<Object, Object>{
+        
+        private int yCompStr;
+        private int[] RGBcolors;
+        FractalWorker(int y){
+            this.yCompStr = y;
+        }
+
+        @Override
+        protected Object doInBackground() throws Exception {
+            // TODO Auto-generated method stub
+            RGBcolors = new int[screenSize];
+            for(int x = 0; x < screenSize; x++)
+            {
+                double xCoord = FractalGenerator.getCoord (complRange.x, complRange.x + complRange.width,
+                                                            display.getWidth(), x);
+                double yCoord = FractalGenerator.getCoord (complRange.y, complRange.y + complRange.height,
+                                                            display.getHeight(), yCompStr);
+                int selectedFrac = combo.getSelectedIndex();
+
+                int numOfIterations = fracGen.get(selectedFrac).numIterations(xCoord, yCoord);
+                RGBcolors[x] = Color.HSBtoRGB(0, 0, 0);
+                if (numOfIterations != -1)
+                {
+                    float hue = 0.7f + (float) numOfIterations / 200f;
+                    RGBcolors[x] = Color.HSBtoRGB(hue, 1f, 1f);
+                }
+                //this.display.drawPixel(x, y, color);
+            }
+            rowsRemaining--;
+            if(rowsRemaining == 0)
+                enableUI(true);
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            // TODO Auto-generated method stub
+
+            for(int xStr = 0; xStr < screenSize; xStr++)
+            {
+                display.drawPixel(xStr, yCompStr, RGBcolors[xStr]);
+            }
+            display.repaint(0,0,yCompStr,screenSize,1);
+            //display.repaint();
+            super.done();
+        }
+    }
+
+    private void enableUI(boolean enable) {
+		combo.setEnabled(enable);
+		saveButton.setEnabled(enable);
+		resetButton.setEnabled(enable);
+    }
+    
     public static void main(String[] args) {
         FractalExplorer fractals = new FractalExplorer(600);
         fractals.createAndShowGUI();

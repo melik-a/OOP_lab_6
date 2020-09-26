@@ -39,8 +39,8 @@ public class JImageDisplay extends javax.swing.JComponent {
         g.setColor(new Color(rgbColor));
         //g.drawImage(displImage, x, y, 1, 1,null);
         //g.fillOval(x, y, 1, 1);
-        //g.fillRect(x, y, 1, 1);
-        g.drawString("o", x, y);
+        g.fillRect(x, y, 1, 1);
+        //g.drawString("o", x, y);
         this.repaint();
     }
 
