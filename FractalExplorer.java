@@ -212,10 +212,6 @@ public class FractalExplorer {
                 //this.display.drawPixel(x, y, color);
                 
             }
-        
-            
-            
-        
             return null;
         }
 
@@ -228,7 +224,7 @@ public class FractalExplorer {
                 display.drawPixel(xStr, yCompStr, RGBcolors[xStr]);
             }
             display.repaint(0,0,yCompStr,screenSize,1);
-            
+
             rowsRemaining--;
             if(rowsRemaining == 0){
                 enableUI(true);
